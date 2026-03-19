@@ -233,3 +233,56 @@
     max-height: calc(100% - 80px) !important;
   }
 }
+
+.save-box {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: var(--cell-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--box-border-radius);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  line-height: 1;
+  box-shadow: var(--shadows);
+
+  &:hover:not(:disabled) {
+    background-color: var(--highlight-color);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &.saved {
+    background-color: var(--highlight-color);
+    color: #fff;
+    border-color: var(--highlight-color);
+
+    svg {
+      stroke: #fff;
+    }
+  }
+}
+

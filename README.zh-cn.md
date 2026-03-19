@@ -12,6 +12,7 @@
 - **SEO 友好** `/sitemap.xml`
 - **浏览器端 0 JS**
 - **提供 RSS 和 RSS JSON** `/rss.xml` `/rss.json`
+- **通过 Bot API 将帖子保存到 Telegram 频道**
 
 ## 🪧 演示
 
@@ -80,6 +81,10 @@ CHANNEL=miantiao_me
 LOCALE=zh-cn
 TIMEZONE=Asia/Shanghai
 
+## Telegram Bot 配置（用于收藏功能）
+BOT_TOKEN=your_bot_token_here
+SAVE_CHANNEL_ID=-1001234567890
+
 ## 社交媒体用户名
 TELEGRAM=ccbikai
 TWITTER=ccbikai
@@ -116,8 +121,178 @@ STATIC_PROXY=
    - 修改完环境变量后需要重新部署
    - Telegram 会屏蔽一些敏感频道的公开展示， 可以通过访问 `https://t.me/s/频道用户名` 确认
 
+2. 如何使用收藏功能？
+   - 配置 `BOT_TOKEN` 为你的 Telegram Bot Token（从 [@BotFather](https://t.me/botfather) 获取）
+   - 配置 `SAVE_CHANNEL_ID` 为目标频道 ID（帖子将转发到此频道）
+   - Bot 必须是目标频道的管理员
+   - 配置完成后，每条帖子下方会出现收藏按钮
+
+## 📖 收藏功能详细配置指南
+
+本指南将一步步帮助你完成收藏功能的设置。
+
+### 步骤 1：创建 Telegram Bot
+
+1. 打开 Telegram 上的 [BotFather](https://t.me/botfather)
+2. 发送 `/newbot` 命令
+3. 按照提示给你的机器人命名并创建用户名
+4. BotFather 会提供给你一个 **Bot Token**（格式：`1234567890:ABCdefGHIjklMNOpqrsTUVwxyz`）
+5. **保存这个 Token** - 你会在配置中使用它
+
+### 步骤 2：创建或选择目标频道
+
+选择你想要保存帖子的位置：
+
+**选项 A：创建新频道**
+1. 在 Telegram 中，点击**菜单**图标（三条横线）
+2. 选择**新建频道**
+3. 设置频道名称和描述（例如："我的收藏"）
+4. 选择**公开频道**并设置用户名
+5. 完成频道创建
+
+**选项 B：使用现有频道**
+- 选择你拥有的任何想要保存帖子的频道
+- 确保频道允许转发
+
+### 步骤 3：获取频道 ID
+
+你需要目标频道的数字 ID：
+
+**方法 1：使用机器人（推荐）**
+1. 将 [@GetMyIdBot](https://t.me/GetMyIdBot) 添加到你的联系人
+2. 从目标频道转发一条消息给这个机器人
+3. 机器人会回复频道 ID（格式：`-1001234567890`）
+
+**方法 2：使用浏览器开发者工具**
+1. 在浏览器中打开你的频道（https://web.telegram.org/k/#channel_name）
+2. 打开浏览器开发者工具（F12）
+3. 进入**网络**（Network）标签页
+4. 在频道中点击一条消息
+5. 查找响应中包含 `channel_id` 或 `chat_id` 的 API 请求
+
+**方法 3：使用 Telegram API 工具**
+- 使用 [Telegram API ID Finder](https://t.me/tgscanbot) 等工具获取你的频道 ID
+
+**注意：** 超级群组和频道的 ID 总是以 `-100` 开头。
+
+### 步骤 4：将 Bot 添加为管理员
+
+1. 在 Telegram 上打开你的目标频道
+2. 点击频道名称打开频道信息
+3. 点击**管理员**（或**管理** → **管理员**）
+4. 点击**添加管理员**
+5. 通过用户名搜索你的机器人
+6. 选择你的机器人并授予以下权限：
+   - ✅ **编辑消息**（可选，但推荐）
+   - ✅ **删除消息**（可选）
+   - ✅ **通过链接邀请用户**（可选）
+   - ✅ **管理语音聊天**（可选）
+7. 点击**完成**确认
+
+**重要提示：** 机器人必须拥有管理员权限才能向频道转发消息。
+
+### 步骤 5：配置环境变量
+
+使用获取到的值更新你的环境变量：
+
+```env
+## 从 BotFather 获取的 Telegram Bot Token
+BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
+
+## 目标频道 ID（以 -100 开头）
+SAVE_CHANNEL_ID=-1001234567890
+```
+
+#### 针对不同部署平台：
+
+**Cloudflare Pages：**
+1. 进入你的项目设置
+2. 导航到 **Settings** → **Functions** → **Environment variables**
+3. 添加上述两个变量
+4. 保存并重新部署
+
+**Netlify：**
+1. 进入 **Site settings** → **Environment variables**
+2. 添加变量
+3. 保存并重新部署
+
+**Vercel：**
+1. 进入 **Settings** → **Environment Variables**
+2. 添加变量
+3. 保存并重新部署
+
+**VPS/Docker：**
+1. 编辑你的 `.env` 文件
+2. 添加变量
+3. 重启应用程序
+
+### 步骤 6：验证设置
+
+部署完成后：
+
+1. 访问你部署的网站
+2. 你应该看到每条帖子下方都有一个书签图标（🔖）
+3. 点击任意帖子的保存按钮
+4. 按钮会显示加载动画，成功后显示对勾（✓）
+5. 检查 Telegram 上的目标频道 - 帖子应该出现在那里
+
+### 故障排除
+
+**按钮没有显示：**
+- 验证 `BOT_TOKEN` 和 `SAVE_CHANNEL_ID` 已正确设置
+- 确保修改环境变量后已重新部署
+- 检查浏览器控制台是否有错误（F12 → Console）
+
+**保存按钮显示错误：**
+- 验证 bot token 有效且未过期
+- 确保 bot 是目标频道的管理员
+- 检查频道 ID 格式（必须以 `-100` 开头）
+- 验证 bot 有权限向频道发送消息
+
+**帖子没有出现在目标频道：**
+- 检查 bot 在频道中的权限
+- 确保目标频道不是私人群组
+- 尝试通过 Telegram 手动转发以验证频道正常工作
+- 检查服务器日志查看详细错误信息
+
+**速率限制：**
+- Telegram 对 Bot API 有速率限制
+- 如果你快速保存很多帖子，可能会遇到延迟
+- 如果有很多用户，考虑实现速率限制
+
+### 安全最佳实践
+
+1. **永远不要提交 `.env` 文件**到版本控制
+2. **使用环境变量**而不是硬编码 token
+3. **定期轮换你的 bot token**如果泄露
+4. **限制 bot 权限**只保留必要的权限
+5. **监控使用情况**并检查异常活动
+6. **使用不同的频道**用于不同的目的（如果需要）
+
+### 高级配置
+
+**多个目标频道：**
+你可以修改代码以支持多个目标频道：
+1. 添加频道选择器 UI
+2. 使用环境变量如 `SAVE_CHANNEL_ID_1`、`SAVE_CHANNEL_ID_2`
+3. 在数据库中存储用户偏好设置
+
+**自定义消息：**
+通过添加以下功能增强保存功能：
+1. 自定义标签或分类
+2. 附加个人备注到保存的帖子
+3. 按类别/文件夹组织
+
+**通知：**
+设置通知来提醒你帖子已保存：
+1. Webhook 集成
+2. 邮件通知
+3. 来自 bot 的 Telegram 直接消息
+
 ## ☕ 赞助
 
 1. [在 Telegram 关注我](https://t.me/miantiao_me)
 2. [在 𝕏 上关注我](https://x.com/ccbikai)
 3. [在 GitHub 赞助我](https://github.com/sponsors/ccbikai)
+
+

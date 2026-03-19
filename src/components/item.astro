@@ -6,6 +6,7 @@ import { getEnv } from '../lib/env'
 
 const locale = getEnv(import.meta.env, Astro, 'LOCALE')
 const timezone = getEnv(import.meta.env, Astro, 'TIMEZONE')
+const channel = getEnv(import.meta.env, Astro, 'CHANNEL')
 
 locale && dayjs.locale(locale)
 
@@ -49,4 +50,56 @@ const timeago = datetime.isBefore(dayjs().subtract(1, 'w'))
       </div>
     )
   }
+  <div class="save-box">
+    <button
+      class="save-button"
+      data-post-id={post.id}
+      data-channel={channel}
+      onclick="handleSave(this)"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+  </div>
 </div>
+
+<script define:vars={{ channel }}>
+  async function handleSave(button) {
+    const postId = button.getAttribute('data-post-id')
+    const channelName = button.getAttribute('data-channel')
+    const buttonText = button.querySelector('svg')
+
+    button.disabled = true
+    buttonText.innerHTML = '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />'
+
+    try {
+      const response = await fetch('/api/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ postId, channel: channelName }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        buttonText.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>'
+        button.classList.add('saved')
+        setTimeout(() => {
+          button.disabled = false
+        }, 2000)
+      }
+      else {
+        throw new Error(data.error || 'Failed to save')
+      }
+    }
+    catch (error) {
+      console.error('Save error:', error)
+      buttonText.innerHTML = '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>'
+      button.disabled = false
+    }
+  }
+</script>
+

@@ -181,6 +181,36 @@ function shouldBlockPost(post, keywords) {
   return keywords.some(keyword => fullContent.includes(keyword.toLowerCase()))
 }
 
+export async function forwardPostToChannel(channel, postId, targetChannelId, botToken) {
+  try {
+    const url = `https://api.telegram.org/bot${botToken}/forwardMessage`
+    const body = {
+      chat_id: targetChannelId,
+      from_chat_id: channel,
+      message_id: postId,
+    }
+
+    const response = await $fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body,
+      retry: 3,
+      retryDelay: 100,
+    })
+
+    return { success: true, data: response }
+  }
+  catch (error) {
+    console.error('Error forwarding post:', error)
+    return {
+      success: false,
+      error: error.message || 'Failed to forward post',
+    }
+  }
+}
+
 export async function getChannelInfo(Astro, { before = '', after = '', q = '', type = 'list', id = '' } = {}) {
   const cacheKey = JSON.stringify({ before, after, q, type, id })
   const cachedResult = cache.get(cacheKey)
