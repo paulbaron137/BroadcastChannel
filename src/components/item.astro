@@ -20,15 +20,27 @@ const timeago = datetime.isBefore(dayjs().subtract(1, 'w'))
 ---
 
 <div class="item" style={{ 'view-transition-name': `post-${post.id}` }}>
-  <div class="time-box">
-    <div class="dot"></div>
-    <div class="time">
-      <a
-        href={`${SITE_URL}posts/${post.id}`}
-        title={post.datetime}
-        class="item-link">{timeago}</a
-      >
+  <div class="item-header">
+    <div class="time-box">
+      <div class="dot"></div>
+      <div class="time">
+        <a
+          href={`${SITE_URL}posts/${post.id}`}
+          title={post.datetime}
+          class="item-link">{timeago}</a
+        >
+      </div>
     </div>
+    <button
+      class="save-button"
+      data-post-id={post.id}
+      data-channel={channel}
+      onclick="handleSave(this)"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
   </div>
   {
     post.content.length > 0 && (
@@ -50,18 +62,6 @@ const timeago = datetime.isBefore(dayjs().subtract(1, 'w'))
       </div>
     )
   }
-  <div class="save-box">
-    <button
-      class="save-button"
-      data-post-id={post.id}
-      data-channel={channel}
-      onclick="handleSave(this)"
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-      </svg>
-    </button>
-  </div>
 </div>
 
 <script define:vars={{ channel }}>

@@ -234,10 +234,11 @@
   }
 }
 
-.save-box {
+.item-header {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .save-button {
@@ -255,6 +256,7 @@
   font-size: 14px;
   line-height: 1;
   box-shadow: var(--shadows);
+  flex-shrink: 0;
 
   &:hover:not(:disabled) {
     background-color: var(--highlight-color);
@@ -285,4 +287,5 @@
     }
   }
 }
+
 
