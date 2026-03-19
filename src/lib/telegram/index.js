@@ -195,18 +195,44 @@ export async function forwardPostToChannel(channel, postId, targetChannelId, bot
       headers: {
         'Content-Type': 'application/json',
       },
-      body,
+      body: JSON.stringify(body),
       retry: 3,
       retryDelay: 100,
     })
 
-    return { success: true, data: response }
+    if (response && response.ok) {
+      return { success: true, data: response }
+    }
+    else {
+      return {
+        success: false,
+        error: response?.description || 'Failed to forward post: Telegram API returned error',
+      }
+    }
   }
   catch (error) {
     console.error('Error forwarding post:', error)
+
+    let errorMessage = error.message || 'Failed to forward post'
+
+    if (error.response) {
+      try {
+        const errorData = typeof error.response === 'string'
+          ? JSON.parse(error.response)
+          : error.response
+
+        if (errorData.description) {
+          errorMessage = `Telegram API error: ${errorData.description}`
+        }
+      }
+      catch {
+        // If parsing fails, use the original error message
+      }
+    }
+
     return {
       success: false,
-      error: error.message || 'Failed to forward post',
+      error: errorMessage,
     }
   }
 }

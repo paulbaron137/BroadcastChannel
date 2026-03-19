@@ -70,6 +70,11 @@ const timeago = datetime.isBefore(dayjs().subtract(1, 'w'))
     const channelName = button.getAttribute('data-channel')
     const buttonText = button.querySelector('svg')
 
+    if (!postId || !channelName) {
+      console.error('Missing post ID or channel name')
+      return
+    }
+
     button.disabled = true
     buttonText.innerHTML = '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />'
 
@@ -84,11 +89,17 @@ const timeago = datetime.isBefore(dayjs().subtract(1, 'w'))
 
       const data = await response.json()
 
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`)
+      }
+
       if (data.success) {
         buttonText.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>'
         button.classList.add('saved')
         setTimeout(() => {
           button.disabled = false
+          buttonText.innerHTML = '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>'
+          button.classList.remove('saved')
         }, 2000)
       }
       else {
@@ -99,7 +110,10 @@ const timeago = datetime.isBefore(dayjs().subtract(1, 'w'))
       console.error('Save error:', error)
       buttonText.innerHTML = '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>'
       button.disabled = false
+
+      alert(`保存失败: ${error.message}`)
     }
   }
 </script>
+
 

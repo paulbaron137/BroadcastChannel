@@ -2,11 +2,12 @@ import { forwardPostToChannel } from '../src/lib/telegram/index.js'
 
 export async function POST(Astro) {
   try {
-    const { postId, channel } = await Astro.request.json()
+    const body = await Astro.request.json()
+    const { postId, channel } = body
 
     if (!postId || !channel) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Missing required fields' }),
+        JSON.stringify({ success: false, error: 'Missing required fields: postId and channel are required' }),
         {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
@@ -17,9 +18,19 @@ export async function POST(Astro) {
     const botToken = Astro.locals?.env?.BOT_TOKEN || import.meta.env.BOT_TOKEN
     const saveChannelId = Astro.locals?.env?.SAVE_CHANNEL_ID || import.meta.env.SAVE_CHANNEL_ID
 
-    if (!botToken || !saveChannelId) {
+    if (!botToken) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Bot configuration missing' }),
+        JSON.stringify({ success: false, error: 'BOT_TOKEN is not configured' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
+    if (!saveChannelId) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'SAVE_CHANNEL_ID is not configured' }),
         {
           status: 500,
           headers: { 'Content-Type': 'application/json' },
@@ -51,7 +62,7 @@ export async function POST(Astro) {
   catch (error) {
     console.error('API error:', error)
     return new Response(
-      JSON.stringify({ success: false, error: 'Internal server error' }),
+      JSON.stringify({ success: false, error: error.message || 'Internal server error' }),
       {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -59,3 +70,4 @@ export async function POST(Astro) {
     )
   }
 }
+
