@@ -173,6 +173,12 @@ function getPost($, item, { channel, staticProxy, index = 0 }) {
 
 const unnessaryHeaders = ['host', 'cookie', 'origin', 'referer']
 
+function shouldBlockPost(post, keywords) {
+  if (!keywords || keywords.length === 0) return false
+  const content = `${post.title || ''} ${post.text || ''}`.toLowerCase()
+  return keywords.some(keyword => content.includes(keyword.toLowerCase()))
+}
+
 export async function getChannelInfo(Astro, { before = '', after = '', q = '', type = 'list', id = '' } = {}) {
   const cacheKey = JSON.stringify({ before, after, q, type, id })
   const cachedResult = cache.get(cacheKey)
@@ -186,6 +192,10 @@ export async function getChannelInfo(Astro, { before = '', after = '', q = '', t
   const host = getEnv(import.meta.env, Astro, 'HOST') ?? 't.me'
   const channel = getEnv(import.meta.env, Astro, 'CHANNEL')
   const staticProxy = getEnv(import.meta.env, Astro, 'STATIC_PROXY') ?? '/static/'
+  const blockKeywords = getEnv(import.meta.env, Astro, 'BLOCK_KEYWORDS')
+    ?.split(',')
+    .map(k => k.trim())
+    .filter(Boolean) || []
 
   const url = id ? `https://${host}/${channel}/${id}?embed=1&mode=tme` : `https://${host}/s/${channel}`
   const headers = Object.fromEntries(Astro.request.headers)
@@ -216,7 +226,7 @@ export async function getChannelInfo(Astro, { before = '', after = '', q = '', t
   }
   const posts = $('.tgme_channel_history  .tgme_widget_message_wrap')?.map((index, item) => {
     return getPost($, item, { channel, staticProxy, index })
-  })?.get()?.reverse().filter(post => ['text'].includes(post.type) && post.id && post.content)
+  })?.get()?.reverse().filter(post => ['text'].includes(post.type) && post.id && post.content && !shouldBlockPost(post, blockKeywords))
 
   const channelInfo = {
     posts,
