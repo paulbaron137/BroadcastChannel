@@ -176,7 +176,9 @@ const unnessaryHeaders = ['host', 'cookie', 'origin', 'referer']
 function shouldBlockPost(post, keywords) {
   if (!keywords || keywords.length === 0) return false
   const content = `${post.title || ''} ${post.text || ''}`.toLowerCase()
-  return keywords.some(keyword => content.includes(keyword.toLowerCase()))
+  const tags = (post.tags || []).join(' ').toLowerCase()
+  const fullContent = `${content} ${tags}`
+  return keywords.some(keyword => fullContent.includes(keyword.toLowerCase()))
 }
 
 export async function getChannelInfo(Astro, { before = '', after = '', q = '', type = 'list', id = '' } = {}) {
