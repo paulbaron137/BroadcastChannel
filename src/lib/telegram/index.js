@@ -193,7 +193,7 @@ export async function getChannelInfo(Astro, { before = '', after = '', q = '', t
   const channel = getEnv(import.meta.env, Astro, 'CHANNEL')
   const staticProxy = getEnv(import.meta.env, Astro, 'STATIC_PROXY') ?? '/static/'
   const blockKeywords = getEnv(import.meta.env, Astro, 'BLOCK_KEYWORDS')
-    ?.split(',')
+    ?.split(/[,，]/)
     .map(k => k.trim())
     .filter(Boolean) || []
 
